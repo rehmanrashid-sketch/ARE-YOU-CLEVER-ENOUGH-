@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Interactive Family Quiz Game</title>
+<style>
+body { font-family: Arial, sans-serif; background:#f0f0f0; margin:0; padding:0; }
+.container { max-width:700px; margin:30px auto; background:#fff; padding:20px; border-radius:8px; box-shadow:0 0 10px rgba(0,0,0,0.1); }
+h1 { text-align:center; }
+.question { margin-bottom:20px; padding:15px; background:#fafafa; border-radius:6px; border:1px solid #ddd; }
+button { padding:10px 15px; margin:5px 0; border:none; border-radius:5px; background:#007bff; color:white; cursor:pointer; width:100%; }
+button:hover { background:#0056b3; }
+.scoreboard { margin-top:20px; padding:15px; background:#e8ffe8; border:1px solid #b2ffb2; border-radius:6px; }
+.timer { text-align:right; font-weight:bold; color:red; }
+.correct { background-color: #4caf50 !important; }
+.incorrect { background-color: #f44336 !important; }
+</style>
+</head>
+<body>
+<div class="container">
+<h1>Interactive Family Quiz Game</h1>
+<div class="timer" id="timer">Time: 15</div>
+<div id="quiz"></div>
+<div id="scoreboard" class="scoreboard" style="display:none;"></div>
+</div>
+<script>
+const questions = [
+  { q: "What is the capital of France?", options: ["Paris","Rome","Berlin","Madrid"], answer: "Paris" },
+  { q: "Which planet is known as the Red Planet?", options: ["Mars","Venus","Jupiter","Saturn"], answer: "Mars" },
+  { q: "Who wrote 'Hamlet'?", options: ["Shakespeare","Tolstoy","Dickens","Hemingway"], answer: "Shakespeare" },
+  { q: "What is 5 + 7?", options: ["12","10","14","13"], answer: "12" },
+  { q: "Which animal is known as the King of Jungle?", options: ["Lion","Tiger","Elephant","Leopard"], answer: "Lion" },
+  { q: "What color do you get when you mix red and white?", options: ["Pink","Purple","Orange","Brown"], answer: "Pink" },
+  { q: "Which ocean is the largest?", options: ["Pacific","Atlantic","Indian","Arctic"], answer: "Pacific" },
+  { q: "Which country is famous for pizza?", options: ["Italy","France","Mexico","Japan"], answer: "Italy" },
+  { q: "Who painted the Mona Lisa?", options: ["Leonardo da Vinci","Van Gogh","Picasso","Rembrandt"], answer: "Leonardo da Vinci" },
+  { q: "What gas do humans breathe in?", options: ["Oxygen","Carbon Dioxide","Nitrogen","Helium"], answer: "Oxygen" },
+];
+
+let score = 0;
+let currentQuestion = 0;
+let timeLeft = 15;
+let timerId;
+const quizDiv = document.getElementById('quiz');
+const timerDiv = document.getElementById('timer');
+const scoreboardDiv = document.getElementById('scoreboard');
+
+function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}
+shuffle(questions);
+
+function showQuestion() {
+  timeLeft = 15;
+  timerDiv.textContent = `Time: ${timeLeft}`;
+  timerId = setInterval(countdown, 1000);
+
+  const q = questions[currentQuestion];
+  let options = [...q.options];
+  shuffle(options);
+  let html = `<div class='question'><p><strong>${currentQuestion + 1}. ${q.q}</strong></p>`;
+  options.forEach(opt => {
+    html += `<button onclick='checkAnswer(this,"${opt}")'>${opt}</button>`;
+  });
+  html += `</div>`;
+  quizDiv.innerHTML = html;
+}
+
+function countdown() {
+  timeLeft--;
+  timerDiv.textContent = `Time: ${timeLeft}`;
+  if(timeLeft <= 0){
+    clearInterval(timerId);
+    nextQuestion();
+  }
+}
+
+function checkAnswer(btn, selected) {
+  clearInterval(timerId);
+  const correct = questions[currentQuestion].answer;
+  if(selected === correct){
+    score += 10;
+    btn.classList.add('correct');
+  } else {
+    btn.classList.add('incorrect');
+    // highlight correct answer
+    Array.from(document.querySelectorAll('button')).forEach(b => {
+      if(b.textContent === correct) b.classList.add('correct');
+    });
+  }
+  setTimeout(nextQuestion, 1000);
+}
+
+function nextQuestion() {
+  currentQuestion++;
+  if(currentQuestion < questions.length){
+    showQuestion();
+  } else {
+    quizDiv.style.display = 'none';
+    timerDiv.style.display = 'none';
+    scoreboardDiv.style.display = 'block';
+    scoreboardDiv.innerHTML = `<h2>Game Over!</h2><p>Your Score: ${score}</p>`;
+  }
+}
+
+showQuestion();
+</script>
+</body>
+</html>
